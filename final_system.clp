@@ -85,7 +85,11 @@
 		(type INSTANCE)
 		(allowed-classes Sensor)
 ;+		(cardinality 1 1)
-		(create-accessor read-write)))
+		(create-accessor read-write))
+	(slot is-calculated
+		(type SYMBOL)
+		(allowed-symbols no yes)
+		(default ?DERIVE)))
 
 (defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
 	(mod (+ ?inp1 ?inp2) 32)
@@ -122,7 +126,11 @@
 		(type INSTANCE)
 		(allowed-classes Sensor)
 ;+		(cardinality 1 1)
-		(create-accessor read-write)))
+		(create-accessor read-write))
+	(slot is-calculated
+		(type SYMBOL)
+		(allowed-symbols no yes)
+		(default ?DERIVE)))
 
 (defmessage-handler Multiplier calculate-output-multi primary (?inp1 ?inp2 )
 	(mod (* ?inp1 ?inp2) 32)
@@ -439,54 +447,73 @@
 
 (defrule calc-outputs-adder
 	(goal (phase calc-output))
-	(object (is-a Adder) (name ?c)
-	(in1 ?inp-sys1)
-	(in2 ?inp-sys2))
+	(object (is-a Adder) (name ?c) (is-calculated no)
+		(in1 ?inp-sys1)
+		(in2 ?inp-sys2))
 	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
  =>
 	(printout t "f" crlf)
-	(modify-instance ?c 
-	(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2))
-	(output_msb (send ?c calculate-output-msb-adder ?inp-val1 ?inp-val2)))
+	(modify-instance ?c
+		(is-calculated yes)
+		(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2))
+		(output_msb (send ?c calculate-output-msb-adder ?inp-val1 ?inp-val2)))
 	(send ?c print)
 
 )
+
+
 (defrule calc-outputs-multi
 	(goal (phase calc-output))
-	(object (is-a Multiplier) (name ?c)
-	(in1 ?inp-sys1)
-	(in2 ?inp-sys2))
+	(object (is-a Multiplier) (name ?c) (is-calculated no)
+		(in1 ?inp-sys1)
+		(in2 ?inp-sys2))
 	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
  =>
 	(printout t "f" crlf)
-	(modify-instance ?c 
-	(output (send ?c calculate-output-multi ?inp-val1 ?inp-val2))
-	(output_msb (send ?c calculate-output-msb-multi ?inp-val1 ?inp-val2)))
+	(modify-instance ?c
+		(is-calculated yes)
+		(output (send ?c calculate-output-multi ?inp-val1 ?inp-val2))
+		(output_msb (send ?c calculate-output-msb-multi ?inp-val1 ?inp-val2)))
 	(send ?c print)
 )
+
+
 (defrule change-goal-to-find-discrepancy
-(not (and (object (is-a Circuit) (output ?out))(test (= ?out 0))))
-?x <- (goal (phase calc-output))
+	(not (and (object (is-a Circuit) (is-calculated ?state))(test (eq ?state no))))
+	?x <- (goal (phase calc-output))
 =>
-(modify ?x (phase find-discrepancy)))
+	(modify ?x (phase find-discrepancy)))
+
 
 (defrule find-discrepancies
-(goal (phase find-discrepancy))
-(object (is-a Circuit) (name ?c) 
-(output ?out) (out ?s))
-(object (is-a Sensor) (name ?s)
-(value ?sr&~?out))
+	(goal (phase find-discrepancy))
+	(object (is-a Circuit) (name ?c) 
+	(output ?out) (out ?s))
+	(object (is-a Sensor) (name ?s)
+	(value ?sr&~?out))
 =>
-(printout t "Sensor " ?s " shows discrepancy: " 
-?sr " instead of " ?out "!" crlf)
+	(printout t "Sensor " ?s " shows discrepancy: " ?sr " instead of " ?out "!" crlf)
 )
+
+(deffunction initialise_circuits ()
+	(do-for-all-instances
+		((?circuit Circuit))
+		(eq ?circuit:is-calculated yes)
+		(modify-instance ?circuit (is-calculated no)) 
+	)
+)
+
 (defrule test-one
-(declare (salience 1))
-?x <- (goal (phase find-discrepancy) (iteration ?i))
+	(declare (salience 1))
+	?x <- (goal (phase find-discrepancy) (iteration ?i))
  =>
-(modify ?x (phase initialise) (iteration (+ ?i 1))))
+	(printout t "INSIDE RULE" crlf crlf)
+	(modify ?x (phase initialise) (iteration (+ ?i 1)))
+	(initialise_circuits))
+
+
 
 (defrule stop
 	(declare (salience 10))
