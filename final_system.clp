@@ -332,39 +332,31 @@
 	(modify-instance [input1]
 	(value ?input1))
 	(send [input1] print)
-	;(printout t ?input1 "function" crlf)
 
 	(modify-instance [input2]
 	(value ?input2))
 	(send [input2] print)
-	;(printout t ?input2 "function" crlf)
 
 	(modify-instance [input3]
 	(value ?input3))
 	(send [input3] print)
-	;(printout t ?input3 "function" crlf)
 
 	(modify-instance [input4]
 	(value ?input4))
 	(send [input4] print)
-	;(printout t ?input4 "function" crlf )
-	;(printout t crlf)
 
 	;sensors
 	(modify-instance [S1]
 	(value ?s1))
 	(send [S1] print)
-	;(printout t ?s1 "function" crlf)
 	 
 	(modify-instance [S2]
 	(value ?s2))
 	(send [S2] print)
-	;(printout t ?s2 "function" crlf)
 
 	(modify-instance [S3]
 	(value ?s3))
 	(send [S3] print)
-	;(printout t ?s3 "function" crlf)
 
 	;output
 	(modify-instance [OUT]
@@ -374,14 +366,23 @@
 )
 
 (defrule inits
+()
 =>
 (printout t "In" crlf)
+(assert (iteration 1))
 
-	(do-for-all-instances
-		((?circle Circle))
-		(= ?circle:number ?i) 
-		;M1, M2, M3 are the three sensors here 
-		(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
-	)
+	
+)
+
+(defrule next_circle
+?x <- (iteration ?i)
+=>
+(do-for-all-instances
+	((?circle Circle))
+	(= ?circle:number ?i) 
+	;M1, M2, M3 are the three sensors here 
+	(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
+)
+(modify ?x (iteration (+ ?i 1)))
 )
 
