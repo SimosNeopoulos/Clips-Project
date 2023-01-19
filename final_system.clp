@@ -499,7 +499,7 @@
 
 (deffunction initialise_circuits ()
 	(do-for-all-instances
-		((?circuit Circuit))
+		((?circuit Ciruit))
 		(eq ?circuit:is-calculated yes)
 		(modify-instance ?circuit (is-calculated no)) 
 	)
