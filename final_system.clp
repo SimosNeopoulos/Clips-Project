@@ -399,45 +399,43 @@
 
 
 (defrule inits
-
 =>
-(printout t "In" crlf)
-(assert (goal (iteration 1) (phase initialise)))
+	(printout t "In" crlf)
+	(assert (goal (iteration 1) (phase initialise)))
 )
 
 (defrule next_circle
-?x <- (goal (iteration ?i) (phase initialise))
+	?x <- (goal (iteration ?i) (phase initialise))
 =>
-(do-for-all-instances
-	((?circle Circle))
-	(= ?circle:number ?i) 
-	;M1, M2, M3 are the three sensors here 
-	(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
-)
-(modify ?x  (phase calc-output))
+	(do-for-all-instances
+		((?circle Circle))
+		(= ?circle:number ?i) 
+		;M1, M2, M3 are the three sensors here 
+		(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
+	)
+	(modify ?x  (phase calc-output))
 )
 
 
 (defrule calc-outputs-adder
-(goal (phase calc-output))
-(object (is-a Adder) (name ?c)
-(A_in1 ?inp-sys1)
-(A_in2 ?inp-sys2))
-(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
-(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
-(object (is-a Sensor))  
+	(goal (phase calc-output))
+	(object (is-a Adder) (name ?c)
+	(A_in1 ?inp-sys1)
+	(A_in2 ?inp-sys2))
+	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
+	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
+	(object (is-a Sensor))  
  =>
-(printout t "f" crlf)
-(modify-instance ?c 
-(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2)))
-
-(send ?c print)
+	(printout t "f" crlf)
+	(modify-instance ?c 
+	(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2)))
+	(send ?c print)
 )
 
 (defrule stop
-(declare (salience 10))
-?x <- (goal (iteration 11))
+	(declare (salience 10))
+	?x <- (goal (iteration 11))
  =>
-(retract ?x)
-(halt)
+	(retract ?x)
+	(halt)
 )
