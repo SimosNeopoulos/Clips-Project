@@ -1,4 +1,3 @@
-
 (defclass Circle
 	(is-a USER)
 	(role concrete)
@@ -72,11 +71,20 @@
 		(allowed-classes Input Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
+	(slot output
+		(type INTEGER)
+		(range 0 32)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
 	(slot A_out
 		(type INSTANCE)
 		(allowed-classes Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
+
+		(defmessage-handler Adder calculate-output-adder primary (?inp )
+	(* ?inp ?inp)
+)
 
 (defclass Multiplier
 	(is-a Circuit)
@@ -91,6 +99,11 @@
 		(allowed-classes Input Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
+	(slot output
+		(type INTEGER)
+		(range 0 32)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
 	(slot M_out
 		(type INSTANCE)
 		(allowed-classes Sensor)
@@ -101,6 +114,11 @@
 	(is-a System)
 	(role concrete)
 	(slot value
+		(type INTEGER)
+		(range 0 32)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(slot output
 		(type INTEGER)
 		(range 0 32)
 ;+		(cardinality 1 1)
@@ -373,88 +391,91 @@
 	(printout t crlf)
 )
 
-(defmessage-handler component calculate-output primary (?inp)
-	(* ?inp ?inp)
-)
+
 
 (defrule inits
 
  =>
 (printout t "In" crlf)
 
-	;(do-for-all-instances
-	;	((?circle Circle))
-	;	(= ?circle:number ?i) 
-	;	;M1, M2, M3 are the three sensors here 
-	;	(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
-	;)
+	(do-for-all-instances
+		((?circle Circle))
+		(= ?circle:number 1) 
+		;M1, M2, M3 are the three sensors here 
+		(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
+	)
 		(set-strategy breadth)
-  	(assert (goal bind-values))
+		(assert (goal calc-output))
+  	
+
 )
 
-(defrule bind-value-to-inputs
-	(goal bind-values)
-	(object (is-a Circle)(number 1) (input_1 ?val1))
-	(object (is-a Input) (name [input1]))
-	(object (is-a Circle)(number 1) (input_2 ?val2))
-	(object (is-a Input) (name [input2]))
-	(object (is-a Circle)(number 1) (input_3 ?val3))
-	(object (is-a Input) (name [input3]))
-	(object (is-a Circle)(number 1) (input_4 ?val4))
-	(object (is-a Input) (name [input4]))
+;(defrule bind-value-to-inputs
+;	(goal bind-values)
+;	(object (is-a Circle)(number 1) (input_1 ?val1))
+;	(object (is-a Input) (name [input1]))
+;	(object (is-a Circle)(number 1) (input_2 ?val2))
+;	(object (is-a Input) (name [input2]))
+;	(object (is-a Circle)(number 1) (input_3 ?val3))
+;	(object (is-a Input) (name [input3]))
+;	(object (is-a Circle)(number 1) (input_4 ?val4))
+;	(object (is-a Input) (name [input4]))
+;
+;  =>
+ ; 	(modify-instance [input1] (value ?val1))
+;	(send [input1] print)
+;	(printout t crlf)
+;	(modify-instance [input2] (value ?val2))
+;	(send [input2] print)
+;	(printout t crlf)
+;	(modify-instance [input3] (value ?val3))
+;	(send [input3] print)
+;	(printout t crlf)
+;	(modify-instance [input4] (value ?val4))
+;	(send [input4] print)
+;	(printout t crlf)
+;)
 
-  =>
-  	(modify-instance [input1] (value ?val1))
-	(send [input1] print)
-	(printout t crlf)
-	(modify-instance [input2] (value ?val2))
-	(send [input2] print)
-	(printout t crlf)
-	(modify-instance [input3] (value ?val3))
-	(send [input3] print)
-	(printout t crlf)
-	(modify-instance [input4] (value ?val4))
-	(send [input4] print)
-	(printout t crlf)
-)
+;(defrule bind-values-to-sensors
+;   (goal bind-values)
+;    (object (is-a Circle)(number 1) (M1 ?val1))
+;	(object (is-a Sensor) (name [S1]))
+;	(object (is-a Circle)(number 1) (M2 ?val2))
+;	(object (is-a Sensor) (name [S2]))
+;	(object (is-a Circle)(number 1) (M3 ?val3))
+;	(object (is-a Sensor) (name [S3]))
+;	(object (is-a Circle)(number 1) (OUT ?val4))
+;	(object (is-a Output) (name [OUT]))
+;=>
+;(printout t "In" crlf)
+ ;	(modify-instance [S1] (value ?val1))
+;	(send [S1] print)
+;	(printout t crlf)
+;	(modify-instance [S2] (value ?val2))
+;	(send [S2] print)
+;	(printout t crlf)
+;	(modify-instance [S3] (value ?val3))
+;	(send [S3] print)
+;	(printout t crlf)
+;	(modify-instance [OUT] (value ?val4))
+;	(send [OUT] print)
+;	(printout t crlf)
+; )
 
-(defrule bind-values-to-sensors
-    (goal bind-values)
-    (object (is-a Circle)(number 1) (M1 ?val1))
-	(object (is-a Sensor) (name [S1]))
-	(object (is-a Circle)(number 1) (M2 ?val2))
-	(object (is-a Sensor) (name [S2]))
-	(object (is-a Circle)(number 1) (M3 ?val3))
-	(object (is-a Sensor) (name [S3]))
-	(object (is-a Circle)(number 1) (OUT ?val4))
-	(object (is-a Output) (name [OUT]))
-=>
-(printout t "In" crlf)
- 	(modify-instance [S1] (value ?val1))
-	(send [S1] print)
-	(printout t crlf)
-	(modify-instance [S2] (value ?val2))
-	(send [S2] print)
-	(printout t crlf)
-	(modify-instance [S3] (value ?val3))
-	(send [S3] print)
-	(printout t crlf)
-	(modify-instance [OUT] (value ?val4))
-	(send [OUT] print)
-	(printout t crlf)
- )
+;(defrule change-goal-to-calc-output
+;?x <- (goal bind-values)
+;=>
+;(retract ?x)
+;(assert (goal calc-output))
+;)
 
-(defrule change-goal-to-calc-output
-?x <- (goal bind-values)
-=>
-(retract ?x)
-(assert (goal calc-output))
-)
-
-(defrule calc-outputs
+(defrule calc-outputs-adder
 (goal calc-output)
-(object (is-a Circuit) (name ?c)
-(input ?inp-val))
-=>
+(object (is-a Adder) (name ?c)
+(A_in1 ?inp-val))
+(object (is-a System) (name ?inp-val) (value ?inp-val1))
+ =>
+(printout t "f" crlf)
 (modify-instance ?c 
-(output (send ?c calculate-output ?inp-val))))
+(output (send ?c calculate-output-adder ?inp-val1)))
+(send ?c print))
