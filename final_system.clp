@@ -4,46 +4,37 @@
 	(slot M3
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot input_1
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot input_2
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot input_3
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot OUT
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot number
 		(type INTEGER)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot input_4
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot M1
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot M2
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
 (defclass System
@@ -51,7 +42,6 @@
 	(role concrete)
 	(slot name_
 		(type STRING)
-;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
 (defclass Circuit
@@ -64,27 +54,22 @@
 	(slot in1
 		(type INSTANCE)
 		(allowed-classes Sensor Input)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot in2
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot output
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot output_msb
 		(type INTEGER)
 		(range 0 16)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot out
 		(type INSTANCE)
 		(allowed-classes Sensor)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot is-calculated
 		(type SYMBOL)
@@ -105,27 +90,22 @@
 	(slot in2
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot in1
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot output
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot output_msb
 		(type INTEGER)
 		(range 0 16)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot out
 		(type INSTANCE)
 		(allowed-classes Sensor)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot is-calculated
 		(type SYMBOL)
@@ -144,22 +124,18 @@
 	(slot value
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot output
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write))
 	(slot sensor_value_from_multiplier
 		(type INSTANCE)
 		(allowed-classes Multiplier)
-;+		(cardinality 0 1)
 		(create-accessor read-write))
 	(slot sensor_value_from_adder
 		(type INSTANCE)
 		(allowed-classes Adder)
-;+		(cardinality 0 1)
 		(create-accessor read-write)))
 
 (defclass Output
@@ -172,7 +148,6 @@
 	(slot value
 		(type INTEGER)
 		(range 0 32)
-;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
 
@@ -390,45 +365,44 @@
 (deffunction update_circle (?input1 ?input2 ?input3 ?input4 ?s1 ?s2 ?s3 ?out)
 	(modify-instance [input1]
 	(value ?input1))
-	(send [input1] print)
+;	(send [input1] print)
 
 	(modify-instance [input2]
 	(value ?input2))
-	(send [input2] print)
+;	(send [input2] print)
 
 	(modify-instance [input3]
 	(value ?input3))
-	(send [input3] print)
+;	(send [input3] print)
 
 	(modify-instance [input4]
 	(value ?input4))
-	(send [input4] print)
+;	(send [input4] print)
 
 	;sensors
 	(modify-instance [S1]
 	(value ?s1))
-	(send [S1] print)
+;	(send [S1] print)
 	 
 	(modify-instance [S2]
 	(value ?s2))
-	(send [S2] print)
+;	(send [S2] print)
 
 	(modify-instance [S3]
 	(value ?s3))
-	(send [S3] print)
+;	(send [S3] print)
 
 	;output
 	(modify-instance [OUT]
 	(value ?out))
-	(send [OUT] print)
-	(printout t crlf)
+;	(send [OUT] print)
+;	(printout t crlf)
 )
 
 
 
 (defrule inits
 =>
-	(printout t "In" crlf)
 	(assert (goal (iteration 1) (phase initialise)))
 )
 
@@ -453,12 +427,11 @@
 	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
  =>
-	(printout t "f" crlf)
 	(modify-instance ?c
 		(is-calculated yes)
 		(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2))
 		(output_msb (send ?c calculate-output-msb-adder ?inp-val1 ?inp-val2)))
-	(send ?c print)
+;	(send ?c print)
 
 )
 
@@ -476,7 +449,7 @@
 		(is-calculated yes)
 		(output (send ?c calculate-output-multi ?inp-val1 ?inp-val2))
 		(output_msb (send ?c calculate-output-msb-multi ?inp-val1 ?inp-val2)))
-	(send ?c print)
+;	(send ?c print)
 )
 
 
