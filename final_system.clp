@@ -146,6 +146,20 @@
 		(range 0 32)
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
+
+(deftemplate iteration
+(slot number 
+(type INTEGER) 
+(range 1 ?VARIABLE))
+)
+
+(deftemplate goal
+(slot phase
+(type SYMBOL)
+(allowed-symbols initialise calc-output)
+(default ?DERIVE))
+)
+
 (definstances facts
 
 
@@ -383,11 +397,7 @@
 	(printout t crlf)
 )
 
-(deftemplate iteration
-(slot number 
-(type INTEGER) 
-(range 1 ?VARIABLE))
-)
+
 
 (defrule inits
 =>
