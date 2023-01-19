@@ -61,12 +61,12 @@
 (defclass Adder
 	(is-a Circuit)
 	(role concrete)
-	(slot A_in1
+	(slot in1
 		(type INSTANCE)
 		(allowed-classes Sensor Input)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(slot A_in2
+	(slot in2
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
 ;+		(cardinality 1 1)
@@ -76,25 +76,34 @@
 		(range 0 32)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(slot A_out
+	(slot output_msb
+		(type INTEGER)
+		(range 0 16)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(slot out
 		(type INSTANCE)
 		(allowed-classes Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
-		(defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
-	(* ?inp1 ?inp2)
+(defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
+	(mod (+ ?inp1 ?inp2) 32)
+)
+
+(defmessage-handler Adder calculate-output-msb-adder primary (?inp1 ?inp2 )
+	(mod (+ ?inp1 ?inp2) 16)
 )
 
 (defclass Multiplier
 	(is-a Circuit)
 	(role concrete)
-	(slot M_in2
+	(slot in2
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(slot M_in1
+	(slot in1
 		(type INSTANCE)
 		(allowed-classes Input Sensor)
 ;+		(cardinality 1 1)
@@ -104,12 +113,23 @@
 		(range 0 32)
 ;+		(cardinality 1 1)
 		(create-accessor read-write))
-	(slot M_out
+	(slot output_msb
+		(type INTEGER)
+		(range 0 16)
+;+		(cardinality 1 1)
+		(create-accessor read-write))
+	(slot out
 		(type INSTANCE)
 		(allowed-classes Sensor)
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
+(defmessage-handler Multiplier calculate-output-multi primary (?inp1 ?inp2 )
+	(mod (* ?inp1 ?inp2) 32)
+)
+(defmessage-handler Multiplier calculate-output-msb-multi primary (?inp1 ?inp2 )
+	(mod (* ?inp1 ?inp2) 16)
+)
 (defclass Sensor
 	(is-a System)
 	(role concrete)
@@ -152,7 +172,7 @@
 (deftemplate goal
 	(slot phase
 		(type SYMBOL)
-		(allowed-symbols initialise calc-output)
+		(allowed-symbols initialise calc-output find-discrepancy)
 		(default ?DERIVE))
 
 	(slot iteration
@@ -304,16 +324,16 @@
 
 ([M1] of  Multiplier
 
-	(M_in1 [input2])
-	(M_in2 [S1])
-	(M_out [S2])
+	(in1 [input2])
+	(in2 [S1])
+	(out [S2])
 	(name_ "Π1"))
 
 ([M2] of  Multiplier
 
-	(M_in1 [input3])
-	(M_in2 [input4])
-	(M_out [S3])
+	(in1 [input3])
+	(in2 [input4])
+	(out [S3])
 	(name_ "Π2"))
 
 ([S1] of  Sensor
@@ -339,16 +359,16 @@
 
 ([A1] of  Adder
 
-	(A_in1 [input1])
-	(A_in2 [input1])
-	(A_out [S1])
+	(in1 [input1])
+	(in2 [input1])
+	(out [S1])
 	(name_ "A1"))
 
 ([A2] of  Adder
 
-	(A_in1 [S3])
-	(A_in2 [S2])
-	(A_out [OUT])
+	(in1 [S3])
+	(in2 [S2])
+	(out [OUT])
 	(name_ "A2"))
 
 ([OUT] of  Output
@@ -420,17 +440,53 @@
 (defrule calc-outputs-adder
 	(goal (phase calc-output))
 	(object (is-a Adder) (name ?c)
-	(A_in1 ?inp-sys1)
-	(A_in2 ?inp-sys2))
+	(in1 ?inp-sys1)
+	(in2 ?inp-sys2))
 	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
-	(object (is-a Sensor))  
  =>
 	(printout t "f" crlf)
 	(modify-instance ?c 
-	(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2)))
+	(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2))
+	(output_msb (send ?c calculate-output-msb-adder ?inp-val1 ?inp-val2)))
+	(send ?c print)
+
+)
+(defrule calc-outputs-multi
+	(goal (phase calc-output))
+	(object (is-a Multiplier) (name ?c)
+	(in1 ?inp-sys1)
+	(in2 ?inp-sys2))
+	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
+	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
+ =>
+	(printout t "f" crlf)
+	(modify-instance ?c 
+	(output (send ?c calculate-output-multi ?inp-val1 ?inp-val2))
+	(output_msb (send ?c calculate-output-msb-multi ?inp-val1 ?inp-val2)))
 	(send ?c print)
 )
+(defrule change-goal-to-find-discrepancy
+(not (and (object (is-a Circuit) (output ?out))(test (= ?out 0))))
+?x <- (goal (phase calc-output))
+=>
+(modify ?x (phase find-discrepancy)))
+
+(defrule find-discrepancies
+(goal (phase find-discrepancy))
+(object (is-a Circuit) (name ?c) 
+(output ?out) (out ?s))
+(object (is-a Sensor) (name ?s)
+(value ?sr&~?out))
+=>
+(printout t "Sensor " ?s " shows discrepancy: " 
+?sr " instead of " ?out "!" crlf)
+)
+(defrule test-one
+(declare (salience 1))
+?x <- (goal (phase find-discrepancy) (iteration ?i))
+ =>
+(modify ?x (phase initialise) (iteration (+ ?i 1))))
 
 (defrule stop
 	(declare (salience 10))
