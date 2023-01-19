@@ -147,21 +147,20 @@
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
-(deftemplate iteration
-(slot number 
-(type INTEGER) 
-(range 1 ?VARIABLE))
-)
+
 
 (deftemplate goal
-(slot phase
-(type SYMBOL)
-(allowed-symbols initialise calc-output)
-(default ?DERIVE))
+	(slot phase
+		(type SYMBOL)
+		(allowed-symbols initialise calc-output)
+		(default ?DERIVE))
+
+	(slot iteration
+		(type INTEGER) 
+		(range 1 ?VARIABLE))
 )
 
 (definstances facts
-
 
 ([Time1] of  Circle
 
@@ -403,13 +402,11 @@
 
 =>
 (printout t "In" crlf)
-(assert (iteration (number 1)))
-(assert (goal (phase initialise)))
+(assert (goal (iteration 1) (phase initialise)))
 )
 
 (defrule next_circle
-?x <- (goal (phase initialise))
-(iteration (number ?i))
+?x <- (goal (iteration ?i) (phase initialise))
 =>
 (do-for-all-instances
 	((?circle Circle))
@@ -439,7 +436,7 @@
 
 (defrule stop
 (declare (salience 10))
-?x <- (iteration (number 11))
+?x <- (goal (iteration 11))
  =>
 (retract ?x)
 (halt)
