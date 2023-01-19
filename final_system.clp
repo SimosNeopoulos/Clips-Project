@@ -28,11 +28,11 @@
 		(type INTEGER)
 		(range 0 32)
 		(create-accessor read-write))
-	(slot M1
+	(slot Multiplier_1
 		(type INTEGER)
 		(range 0 32)
 		(create-accessor read-write))
-	(slot M2
+	(slot Multiplier_2
 		(type INTEGER)
 		(range 0 32)
 		(create-accessor read-write)))
@@ -183,8 +183,8 @@
 	(input_2 28)
 	(input_3 10)
 	(input_4 25)
-	(M1 10)
-	(M2 24)
+	(Multiplier_1 10)
+	(Multiplier_2 24)
 	(M3 26)
 	(number 1)
 	(OUT 18))
@@ -195,8 +195,8 @@
 	(input_2 25)
 	(input_3 13)
 	(input_4 15)
-	(M1 0)
-	(M2 0)
+	(Multiplier_1 0)
+	(Multiplier_2 0)
 	(M3 3)
 	(number 2)
 	(OUT 3))
@@ -207,8 +207,8 @@
 	(input_2 17)
 	(input_3 24)
 	(input_4 31)
-	(M1 22)
-	(M2 6)
+	(Multiplier_1 22)
+	(Multiplier_2 6)
 	(M3 8)
 	(number 3)
 	(OUT 14))
@@ -219,8 +219,8 @@
 	(input_2 11)
 	(input_3 28)
 	(input_4 21)
-	(M1 4)
-	(M2 12)
+	(Multiplier_1 4)
+	(Multiplier_2 12)
 	(M3 12)
 	(number 4)
 	(OUT 0))
@@ -231,8 +231,8 @@
 	(input_2 24)
 	(input_3 30)
 	(input_4 10)
-	(M1 18)
-	(M2 16)
+	(Multiplier_1 18)
+	(Multiplier_2 16)
 	(M3 12)
 	(number 5)
 	(OUT 12))
@@ -243,8 +243,8 @@
 	(input_2 19)
 	(input_3 11)
 	(input_4 19)
-	(M1 8)
-	(M2 24)
+	(Multiplier_1 8)
+	(Multiplier_2 24)
 	(M3 17)
 	(number 6)
 	(OUT 9))
@@ -255,8 +255,8 @@
 	(input_2 31)
 	(input_3 7)
 	(input_4 22)
-	(M1 2)
-	(M2 0)
+	(Multiplier_1 2)
+	(Multiplier_2 0)
 	(M3 26)
 	(number 7)
 	(OUT 26))
@@ -267,8 +267,8 @@
 	(input_2 31)
 	(input_3 3)
 	(input_4 23)
-	(M1 0)
-	(M2 0)
+	(Multiplier_1 0)
+	(Multiplier_2 0)
 	(M3 0)
 	(number 8)
 	(OUT 0))
@@ -279,8 +279,8 @@
 	(input_2 1)
 	(input_3 6)
 	(input_4 8)
-	(M1 30)
-	(M2 30)
+	(Multiplier_1 30)
+	(Multiplier_2 30)
 	(M3 0)
 	(number 9)
 	(OUT 30))
@@ -291,8 +291,8 @@
 	(input_2 4)
 	(input_3 25)
 	(input_4 12)
-	(M1 12)
-	(M2 31)
+	(Multiplier_1 12)
+	(Multiplier_2 31)
 	(M3 12)
 	(number 10)
 	(OUT 28))
@@ -317,98 +317,89 @@
 	(name_ "In_4")
 	(value 25))
 
-([M1] of  Multiplier
+([Multiplier_1] of  Multiplier
 
 	(in1 [input2])
-	(in2 [S1])
-	(out [S2])
+	(in2 [Sensor_1])
+	(out [Sensor_2])
 	(name_ "Π1"))
 
-([M2] of  Multiplier
+([Multiplier_2] of  Multiplier
 
 	(in1 [input3])
 	(in2 [input4])
-	(out [S3])
+	(out [Sensor_3])
 	(name_ "Π2"))
 
-([S1] of  Sensor
+([Sensor_1] of  Sensor
 
-	(name_ "M1")
+	(name_ "Multiplier_1")
 	(value 10)
-	(sensor_value_from_adder [A1])
+	(sensor_value_from_adder [Adder_1])
 	)
 
-([S2] of  Sensor
+([Sensor_2] of  Sensor
 
-	(name_ "M2")
+	(name_ "Multiplier_2")
 	(value 24)
-	(sensor_value_from_multiplier [M1])
+	(sensor_value_from_multiplier [Multiplier_1])
 	)
 
-([S3] of  Sensor
+([Sensor_3] of  Sensor
 
 	(name_ "M3")
 	(value 26)
-	(sensor_value_from_multiplier [M2])
+	(sensor_value_from_multiplier [Multiplier_2])
 	)
 
-([A1] of  Adder
+([Adder_1] of  Adder
 
 	(in1 [input1])
 	(in2 [input1])
-	(out [S1])
-	(name_ "A1"))
+	(out [Sensor_1])
+	(name_ "Adder_1"))
 
-([A2] of  Adder
+([Adder_2] of  Adder
 
-	(in1 [S3])
-	(in2 [S2])
+	(in1 [Sensor_3])
+	(in2 [Sensor_2])
 	(out [OUT])
-	(name_ "A2"))
+	(name_ "Adder_2"))
 
 ([OUT] of  Output
 
 	(name_ "OUT")
 	(value 18)
-	(sensor_value_from_adder [A2])
+	(sensor_value_from_adder [Adder_2])
 	)
 )
 
 (deffunction update_circle (?input1 ?input2 ?input3 ?input4 ?s1 ?s2 ?s3 ?out)
 	(modify-instance [input1]
 	(value ?input1))
-;	(send [input1] print)
 
 	(modify-instance [input2]
 	(value ?input2))
-;	(send [input2] print)
 
 	(modify-instance [input3]
 	(value ?input3))
-;	(send [input3] print)
 
 	(modify-instance [input4]
 	(value ?input4))
-;	(send [input4] print)
 
 	;sensors
-	(modify-instance [S1]
+	(modify-instance [Sensor_1]
 	(value ?s1))
-;	(send [S1] print)
 	 
-	(modify-instance [S2]
+	(modify-instance [Sensor_2]
 	(value ?s2))
-;	(send [S2] print)
 
-	(modify-instance [S3]
+	(modify-instance [Sensor_3]
 	(value ?s3))
-;	(send [S3] print)
 
 	;output
 	(modify-instance [OUT]
 	(value ?out))
-;	(send [OUT] print)
-;	(printout t crlf)
 )
 
 
@@ -418,14 +409,14 @@
 	(assert (goal (iteration 1) (phase initialise)))
 )
 
-(defrule next_circle
+(defrule set_up_values
 	?x <- (goal (iteration ?i) (phase initialise))
 =>
 	(do-for-all-instances
 		((?circle Circle))
 		(= ?circle:number ?i) 
-		;M1, M2, M3 are the three sensors here 
-		(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
+		;Multiplier_1, Multiplier_2, M3 are the three sensors here 
+		(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:Multiplier_1 ?circle:Multiplier_2 ?circle:M3 ?circle:OUT) 
 	)
 	(modify ?x  (phase calc-output))
 )
@@ -474,34 +465,54 @@
 (defrule find-discrepancies-msb
 	(goal (phase find-discrepancy)(iteration ?i))
 	(object (is-a Circuit) (name ?c) 
-	(output ?out) (output_msb ?out_msb) (out ?s))
+			(output ?out) (output_msb ?out_msb) (out ?s))
 	(object (is-a Sensor) (name ?s)
-	(value  ?sr&~?out ))
+			(value  ?sr&~?out ))
 	(test (eq ?sr ?out_msb))
 	
 =>
+	(printout t "Time: " ?i " --> " ?c "  error: Most Significant Bit is off!" crlf)
 	(modify-instance ?c
 		(is-suspect yes))
 )
 (defrule find-discrepancies-short
-	(goal (phase find-discrepancy)(iteration ?i))
-	(object (is-a Circuit) (name ?c) 
-	 (out ?s))
+	(goal (phase find-discrepancy) (iteration ?i))
+	(object (is-a Circuit) (name ?c) (output ?out)
+	 		(out ?s))
 	(object (is-a Sensor) (name ?s)
-	(value  ?sr ))
-	(test (eq ?sr 0))
+			(value  ?sr ))
+	(test (and (eq ?sr 0) (neq ?sr ?out)))
 	
 =>
-	(modify-instance ?c
-		(is-suspect yes))
+	(printout t "Time: " ?i "--> " ?c " error: Short-circuit!" crlf)
+	(modify-instance ?c (is-suspect yes))
 )
 
-(defrule remove-suspects
-  (declare (salience -1))
-  ?x <- (goal (phase find-discrepancy))
-  =>
-  (modify ?x (phase remove-suspects))
+(defrule find-sensor-discrepancies
+	(declare (salience -1))
+	(goal (phase find-discrepancy) (iteration ?i))
+	(object (is-a Sensor) (name ?s) (value  ?sr))
+	(object (is-a Circuit) (out ?s) (output ?out) (is-suspect ?state))
+	(test (and (neq ?sr ?out) (neq ?state yes)))
+=>
+	(printout t "Time: " ?i "--> " ?s " error: Short-circuit!" crlf)
+	(modify-instance ?s (is-suspect yes))
 )
+
+(defrule everything_is_working
+	(declare (salience -2))
+	(goal (phase find-discrepancy) (iteration ?i))
+	(not (object (is-a System) (is-suspect yes) ))
+=>
+	(printout t "Time: " ?i "--> Normal Operation!" crlf)
+)
+
+;(defrule remove-suspects
+  ;(declare (salience -1))
+  ;?x <- (goal (phase find-discrepancy))
+  ;=>
+  ;(modify ?x (phase remove-suspects))
+;)
 
 
 (deffunction initialise_circuits ()
@@ -510,10 +521,16 @@
 		(eq ?circuit:is-calculated yes)
 		(modify-instance ?circuit (is-calculated no)) 
 	)
+
+	(do-for-all-instances
+		((?circuit Circuit))
+		(eq ?circuit:is-suspect yes)
+		(modify-instance ?circuit (is-suspect no)) 
+	)
 )
 
-(defrule test-one
-	(declare (salience -1))
+(defrule next_circle
+	(declare (salience -3))
 	?x <- (goal (phase find-discrepancy) (iteration ?i))
  =>
 	(modify ?x (phase initialise) (iteration (+ ?i 1)))
