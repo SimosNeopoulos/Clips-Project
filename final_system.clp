@@ -74,6 +74,10 @@
 	(slot is-calculated
 		(type SYMBOL)
 		(allowed-symbols no yes)
+		(default ?DERIVE))
+	(slot is-suspect
+		(type SYMBOL)
+		(allowed-symbols no yes)
 		(default ?DERIVE)))
 
 (defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
@@ -110,6 +114,10 @@
 	(slot is-calculated
 		(type SYMBOL)
 		(allowed-symbols no yes)
+		(default ?DERIVE))
+	(slot is-suspect
+		(type SYMBOL)
+		(allowed-symbols no yes)
 		(default ?DERIVE)))
 
 (defmessage-handler Multiplier calculate-output-multi primary (?inp1 ?inp2 )
@@ -136,7 +144,11 @@
 	(slot sensor_value_from_adder
 		(type INSTANCE)
 		(allowed-classes Adder)
-		(create-accessor read-write)))
+		(create-accessor read-write))
+	(slot is-suspect
+		(type SYMBOL)
+		(allowed-symbols no yes)
+		(default ?DERIVE)))
 
 (defclass Output
 	(is-a Sensor)
@@ -155,7 +167,7 @@
 (deftemplate goal
 	(slot phase
 		(type SYMBOL)
-		(allowed-symbols initialise calc-output find-discrepancy)
+		(allowed-symbols initialise calc-output find-discrepancy remove-suspects)
 		(default ?DERIVE))
 
 	(slot iteration
@@ -444,7 +456,6 @@
 	(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 	(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
  =>
-	(printout t "f" crlf)
 	(modify-instance ?c
 		(is-calculated yes)
 		(output (send ?c calculate-output-multi ?inp-val1 ?inp-val2))
@@ -460,29 +471,51 @@
 	(modify ?x (phase find-discrepancy)))
 
 
-(defrule find-discrepancies
-	(goal (phase find-discrepancy))
+(defrule find-discrepancies-msb
+	(goal (phase find-discrepancy)(iteration ?i))
 	(object (is-a Circuit) (name ?c) 
-	(output ?out) (out ?s))
+	(output ?out) (output_msb ?out_msb) (out ?s))
 	(object (is-a Sensor) (name ?s)
-	(value ?sr&~?out))
+	(value  ?sr&~?out ))
+	(test (eq ?sr ?out_msb))
+	
 =>
-	(printout t "Sensor " ?s " shows discrepancy: " ?sr " instead of " ?out "!" crlf)
+	(modify-instance ?c
+		(is-suspect yes))
 )
+(defrule find-discrepancies-short
+	(goal (phase find-discrepancy)(iteration ?i))
+	(object (is-a Circuit) (name ?c) 
+	 (out ?s))
+	(object (is-a Sensor) (name ?s)
+	(value  ?sr ))
+	(test (eq ?sr 0))
+	
+=>
+	(modify-instance ?c
+		(is-suspect yes))
+)
+
+(defrule remove-suspects
+  (declare (salience -1))
+  ?x <- (goal (phase find-discrepancy))
+  =>
+  (modify ?x (phase remove-suspects))
+)
+
 
 (deffunction initialise_circuits ()
 	(do-for-all-instances
-		((?circuit Ciruit))
+		((?circuit Circuit))
 		(eq ?circuit:is-calculated yes)
 		(modify-instance ?circuit (is-calculated no)) 
 	)
 )
 
 (defrule test-one
-	(declare (salience 1))
+	(declare (salience -1))
 	?x <- (goal (phase find-discrepancy) (iteration ?i))
  =>
-	(printout t "INSIDE RULE" crlf crlf)
 	(modify ?x (phase initialise) (iteration (+ ?i 1)))
 	(initialise_circuits))
 
