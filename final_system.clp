@@ -82,8 +82,8 @@
 ;+		(cardinality 1 1)
 		(create-accessor read-write)))
 
-		(defmessage-handler Adder calculate-output-adder primary (?inp )
-	(* ?inp ?inp)
+		(defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
+	(* ?inp1 ?inp2)
 )
 
 (defclass Multiplier
@@ -396,7 +396,7 @@
 )
 
 (defrule next_circle
-?x <- (iteration (number ?i))
+(iteration (number ?i))
 =>
 (do-for-all-instances
 	((?circle Circle))
@@ -404,17 +404,31 @@
 	;M1, M2, M3 are the three sensors here 
 	(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
 )
-(modify ?x (number (+ ?i 1)))
+( assert (goal calc-output))
 )
 
 
 (defrule calc-outputs-adder
+
 (goal calc-output)
 (object (is-a Adder) (name ?c)
-(A_in1 ?inp-val))
-(object (is-a System) (name ?inp-val) (value ?inp-val1))
+(A_in1 ?inp-sys1)
+(A_in2 ?inp-sys2))
+(object (is-a System) (name ?inp-sys1) (value ?inp-val1))
+(object (is-a System) (name ?inp-sys2) (value ?inp-val2))
+(object (is-a Sensor)) 
  =>
 (printout t "f" crlf)
 (modify-instance ?c 
-(output (send ?c calculate-output-adder ?inp-val1)))
-(send ?c print))
+(output (send ?c calculate-output-adder ?inp-val1 ?inp-val2)))
+
+(send ?c print)
+)
+
+(defrule stop
+(declare (salience 10))
+?x <- (iteration (number 11))
+ =>
+(retract ?x)
+(halt)
+)
