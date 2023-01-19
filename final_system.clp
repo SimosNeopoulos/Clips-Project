@@ -400,12 +400,15 @@
 
 
 (defrule inits
+
 =>
 (printout t "In" crlf)
 (assert (iteration (number 1)))
+(assert (goal (phase initialise)))
 )
 
 (defrule next_circle
+?x <- (goal (phase initialise))
 (iteration (number ?i))
 =>
 (do-for-all-instances
@@ -414,19 +417,18 @@
 	;M1, M2, M3 are the three sensors here 
 	(update_circle ?circle:input_1 ?circle:input_2 ?circle:input_3 ?circle:input_4 ?circle:M1 ?circle:M2 ?circle:M3 ?circle:OUT) 
 )
-( assert (goal calc-output))
+(modify ?x  (phase calc-output))
 )
 
 
 (defrule calc-outputs-adder
-
-(goal calc-output)
+(goal (phase calc-output))
 (object (is-a Adder) (name ?c)
 (A_in1 ?inp-sys1)
 (A_in2 ?inp-sys2))
 (object (is-a System) (name ?inp-sys1) (value ?inp-val1))
 (object (is-a System) (name ?inp-sys2) (value ?inp-val2))
-(object (is-a Sensor)) 
+(object (is-a Sensor))  
  =>
 (printout t "f" crlf)
 (modify-instance ?c 
