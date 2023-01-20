@@ -80,10 +80,12 @@
 		(allowed-symbols no yes)
 		(default ?DERIVE)))
 
+; Calculates the output of a functional Adder 
 (defmessage-handler Adder calculate-output-adder primary (?inp1 ?inp2 )
 	(mod (+ ?inp1 ?inp2) 32)
 )
 
+; Calculates the output of an Adder missing the most significant bit MSB
 (defmessage-handler Adder calculate-output-msb-adder primary (?inp1 ?inp2 )
 	(mod (+ ?inp1 ?inp2) 16)
 )
@@ -120,9 +122,12 @@
 		(allowed-symbols no yes)
 		(default ?DERIVE)))
 
+; Calculates the output of a functional Multiplier 
 (defmessage-handler Multiplier calculate-output-multi primary (?inp1 ?inp2 )
 	(mod (* ?inp1 ?inp2) 32)
 )
+
+; Calculates the output of a Multiplier missing the most significant bit MSB
 (defmessage-handler Multiplier calculate-output-msb-multi primary (?inp1 ?inp2 )
 	(mod (* ?inp1 ?inp2) 16)
 )
@@ -163,11 +168,11 @@
 		(create-accessor read-write)))
 
 
-
+; goals to change the program flow 
 (deftemplate goal
 	(slot phase
 		(type SYMBOL)
-		(allowed-symbols initialise calc-output find-discrepancy)
+		(allowed-symbols initialize calc-output find-discrepancy)
 		(default ?DERIVE))
 
 	(slot iteration
@@ -374,6 +379,7 @@
 	)
 )
 
+; a function to update the values of input instances and sensor instances 
 (deffunction update_circle (?input1 ?input2 ?input3 ?input4 ?s1 ?s2 ?s3 ?out)
 	(modify-instance [input1]
 	(value ?input1))
@@ -403,14 +409,16 @@
 )
 
 
-
+; the initial rule
 (defrule inits
 =>
-	(assert (goal (iteration 1) (phase initialise)))
+; initialize the goal and the iteration
+	(assert (goal (iteration 1) (phase initialize)))
 )
 
+; rule to give values to input and sensor instances for each circle
 (defrule set_up_values
-	?x <- (goal (iteration ?i) (phase initialise))
+	?x <- (goal (iteration ?i) (phase initialize))
 =>
 	(do-for-all-instances
 		((?circle Circle))
@@ -421,7 +429,7 @@
 	(modify ?x  (phase calc-output))
 )
 
-
+; Calculating the outputs of adders
 (defrule calc-outputs-adder
 	(goal (phase calc-output))
 	(object (is-a Adder) (name ?c) (is-calculated no)
@@ -438,7 +446,7 @@
 
 )
 
-
+; Calculating the outputs of multipliers
 (defrule calc-outputs-multi
 	(goal (phase calc-output))
 	(object (is-a Multiplier) (name ?c) (is-calculated no)
@@ -454,14 +462,14 @@
 ;	(send ?c print)
 )
 
-
+; If all the circuits outputs are calculated already, it changes the rule to find descrepancy.
 (defrule change-goal-to-find-discrepancy
 	(not (and (object (is-a Circuit) (is-calculated ?state))(test (eq ?state no))))
 	?x <- (goal (phase calc-output))
 =>
 	(modify ?x (phase find-discrepancy)))
 
-
+; Detecting discrepancies and making suspect elements 
 (defrule find-discrepancies-msb
 	(goal (phase find-discrepancy)(iteration ?i))
 	(object (is-a Circuit) (name ?c) 
@@ -475,6 +483,8 @@
 	(modify-instance ?c
 		(is-suspect yes))
 )
+
+; 
 (defrule find-discrepancies-short
 	(goal (phase find-discrepancy) (iteration ?i))
 	(object (is-a Circuit) (name ?c) (output ?out)
@@ -488,6 +498,7 @@
 	(modify-instance ?c (is-suspect yes))
 )
 
+;
 (defrule find-sensor-discrepancies
 	(declare (salience -1))
 	(goal (phase find-discrepancy) (iteration ?i))
@@ -499,6 +510,7 @@
 	(modify-instance ?s (is-suspect yes))
 )
 
+; If everything works fine and there are no discrepancies, printout Normal Operation
 (defrule everything_is_working
 	(declare (salience -2))
 	(goal (phase find-discrepancy) (iteration ?i))
@@ -507,6 +519,7 @@
 	(printout t "Time: " ?i "--> Normal Operation!" crlf)
 )
 
+; Change the rule to remove suspects
 ;(defrule remove-suspects
   ;(declare (salience -1))
   ;?x <- (goal (phase find-discrepancy))
@@ -514,8 +527,8 @@
   ;(modify ?x (phase remove-suspects))
 ;)
 
-
-(deffunction initialise_circuits ()
+;
+(deffunction initialize_circuits ()
 	(do-for-all-instances
 		((?circuit Circuit))
 		(eq ?circuit:is-calculated yes)
@@ -529,15 +542,16 @@
 	)
 )
 
+;
 (defrule next_circle
 	(declare (salience -3))
 	?x <- (goal (phase find-discrepancy) (iteration ?i))
  =>
-	(modify ?x (phase initialise) (iteration (+ ?i 1)))
-	(initialise_circuits))
+	(modify ?x (phase initialize) (iteration (+ ?i 1)))
+	(initialize_circuits))
 
 
-
+;
 (defrule stop
 	(declare (salience 10))
 	?x <- (goal (iteration 11))
