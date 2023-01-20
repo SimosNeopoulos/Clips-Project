@@ -167,7 +167,7 @@
 (deftemplate goal
 	(slot phase
 		(type SYMBOL)
-		(allowed-symbols initialise calc-output find-discrepancy remove-suspects)
+		(allowed-symbols initialise calc-output find-discrepancy)
 		(default ?DERIVE))
 
 	(slot iteration
