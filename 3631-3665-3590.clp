@@ -1,3 +1,7 @@
+; 3631 - PANTELEIMON GRAMMATIKOPOULOS
+; 3665 - SYMEON NEOPOULOS
+; 3590 - ARISTEA LACHANA
+
 (defclass Circle
 	(is-a USER)
 	(role concrete)
@@ -131,6 +135,7 @@
 (defmessage-handler Multiplier calculate-output-msb-multi primary (?inp1 ?inp2 )
 	(mod (* ?inp1 ?inp2) 16)
 )
+
 (defclass Sensor
 	(is-a System)
 	(role concrete)
@@ -168,7 +173,8 @@
 		(create-accessor read-write)))
 
 
-; goals to change the program flow 
+; Goals to change the program flow 
+; Iteration indicates in which Cycle we are currently in 
 (deftemplate goal
 	(slot phase
 		(type SYMBOL)
@@ -484,7 +490,7 @@
 		(is-suspect yes))
 )
 
-; 
+; Checking if there is a short circuit by comparing the output of every circuit with its sensor's value
 (defrule find-discrepancies-short
 	(goal (phase find-discrepancy) (iteration ?i))
 	(object (is-a Circuit) (name ?c) (output ?out)
@@ -498,7 +504,9 @@
 	(modify-instance ?c (is-suspect yes))
 )
 
-;
+; Checking if a sensor has short circuit by testing if the circuit it's getting its output from is a suspect
+; If it is not a suspect and the sensor's value is different from the expected circuits output, it means that 
+; the sensor is malfunctioning
 (defrule find-sensor-discrepancies
 	(declare (salience -1))
 	(goal (phase find-discrepancy) (iteration ?i))
@@ -510,7 +518,7 @@
 	(modify-instance ?s (is-suspect yes))
 )
 
-; If everything works fine and there are no discrepancies, printout Normal Operation
+; If everything works fine and there are no suspects, printout Normal Operation
 (defrule everything_is_working
 	(declare (salience -2))
 	(goal (phase find-discrepancy) (iteration ?i))
@@ -519,15 +527,8 @@
 	(printout t "Time: " ?i "--> Normal Operation!" crlf)
 )
 
-; Change the rule to remove suspects
-;(defrule remove-suspects
-  ;(declare (salience -1))
-  ;?x <- (goal (phase find-discrepancy))
-  ;=>
-  ;(modify ?x (phase remove-suspects))
-;)
-
-;
+; Function that is called to modify the value of is-calculated and is-suspect slots of every circuit 
+; from yes to no
 (deffunction initialize_circuits ()
 	(do-for-all-instances
 		((?circuit Circuit))
@@ -542,7 +543,7 @@
 	)
 )
 
-;
+; Rule that re-initializes the program flow and increases the iteration by 1
 (defrule next_circle
 	(declare (salience -3))
 	?x <- (goal (phase find-discrepancy) (iteration ?i))
@@ -551,7 +552,7 @@
 	(initialize_circuits))
 
 
-;
+; If it's the 11th iteration, the program is halted.
 (defrule stop
 	(declare (salience 10))
 	?x <- (goal (iteration 11))
